@@ -24,9 +24,9 @@ def main():
 
     nodes = len(AG)
 
-    A = generate_A(A, AG, nodes)
-    B = generate_agent_B(B, AG, nodes, 0)
-    B = generate_victim_B(B, nodes, 1)
+    A = generate_A(A, AG)
+    B = generate_agent_B(B, AG, layer=0)
+    B = generate_victim_B(B, layer=1)
     C[0] = np.array([1, 0])
     D[0] = np.array([1, 0, 0, 0, 0])
     D[1] = np.ones(nodes) / nodes
@@ -48,22 +48,24 @@ def main():
     policies += [np.array([[3, 4]])]
     G, UT, SIG, _ = update_posterior_policies(D, A, B, C, policies)
 
-def generate_agent_B(B, AG, nodes, entry):
-    B[entry] = np.zeros((nodes, nodes, nodes))
+def generate_agent_B(B, AG, layer=0):
+    nodes = len(AG)
+    B[layer] = np.zeros((nodes, nodes, nodes))
     for a in range(nodes):
         beta = np.zeros((nodes, 1))
         beta[a] = 1
         I = np.eye(nodes)
-        B[entry][:, :, a] = AG*beta + I - I*AG[a,:]
+        B[layer][:, :, a] = AG*beta + I - I*AG[a,:]
     return B
 
-def generate_victim_B(B, nodes,  entry):
-    B[entry] = np.zeros((nodes, nodes, nodes))
+def generate_victim_B(B,  layer=1):
+    B[layer] = np.zeros((nodes, nodes, nodes))
     for a in range(nodes):
-        B[entry][:, :, a] = np.eye(nodes)
+        B[layer][:, :, a] = np.eye(nodes)
     return B
 
-def generate_A(A, AG, nodes):
+def generate_A(A, AG):
+    nodes = len(AG)
     A[0] = np.zeros((2, nodes, nodes))
     for v in range(nodes):
         for a in range(nodes):
