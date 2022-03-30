@@ -25,3 +25,18 @@ def update_posterior_policies(qs, A, B, C, policies, use_utility=True,
             G[idx] += SIG_c
     q_pi = softmax(G * gamma)    
     return G, UT, SIG, q_pi
+
+def generate_agent_B_short(B, AG, layer=0):
+    nodes = len(AG)
+    degrees = np.sum(AG, axis=0)
+    actions = np.max(degrees)
+    B[layer] = np.zeros((nodes, nodes, actions))
+    for a in range(actions):
+        for v in range(nodes):
+            vector = AG[:, v]
+            entries = np.where(vector == 1)[0]
+            if len(entries) > a:
+                B[layer][entries[a], v, a] = 1
+            else:
+                B[layer][v, v, a] = 1
+    return B

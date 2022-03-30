@@ -1,6 +1,6 @@
 import numpy as np
 from pymdp import control, inference, utils
-from ai_functions import update_posterior_policies
+from ai_functions import update_posterior_policies, generate_agent_B_short
 import matplotlib.pyplot as plt
 
 ## Basic example on the use of active inference over graphs
@@ -23,10 +23,11 @@ def main():
                 [0, 0, 0, 1, 0]))
 
     nodes = len(AG)
+    B = generate_agent_B_short(B, AG)  # only as an example of the shorter formulation
 
     A = generate_A(A, AG)
     B = generate_agent_B(B, AG, layer=0)
-    B = generate_victim_B(B, layer=1)
+    B = generate_victim_B(B, nodes, layer=1)
     C[0] = np.array([1, 0])
     D[0] = np.array([1, 0, 0, 0, 0])
     D[1] = np.ones(nodes) / nodes
@@ -58,7 +59,7 @@ def generate_agent_B(B, AG, layer=0):
         B[layer][:, :, a] = AG*beta + I - I*AG[a,:]
     return B
 
-def generate_victim_B(B,  layer=1):
+def generate_victim_B(B, nodes, layer=1):
     B[layer] = np.zeros((nodes, nodes, nodes))
     for a in range(nodes):
         B[layer][:, :, a] = np.eye(nodes)
