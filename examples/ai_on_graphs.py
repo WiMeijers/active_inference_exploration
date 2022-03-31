@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 
 ## Basic example on the use of active inference over graphs
 
-
 def main():
     ## Creating the Generative Model
     sf = 2  # number of state factors
@@ -42,12 +41,40 @@ def main():
     obs = A[0][:, agent_loc, victim_loc]
     D = inference.update_posterior_states(A, obs, D)
     
-    ## EFE calculations for actions 2 and 3
+    ## EFE calculations for policies of length 1
     policies = []
-    policies += [np.array([[2, 3]])]
-    policies += [np.array([[3, 2]])]
-    policies += [np.array([[3, 4]])]
+    policies += [np.array([[0, 0]])]
+    policies += [np.array([[2, 2]])]
+    policies += [np.array([[3, 3]])]
     G, UT, SIG, _ = update_posterior_policies(D, A, B, C, policies)
+    print('The results for policies of length 1:')
+    print('G: \n', G)
+    print('UT: \n', UT)
+    print('SIG: \n', SIG, '\n')
+    plot_expectations(D, A, B, C, policies)
+
+    ## EFE calculations for policies of length 2
+    policies = []
+    policies += [np.array([[2, 2], [3, 3]])]
+    policies += [np.array([[3, 3], [2, 2]])]
+    policies += [np.array([[3, 3], [4, 4]])]
+    G, UT, SIG, _ = update_posterior_policies(D, A, B, C, policies)
+    print('The results for policies of length 2:')
+    print('G: \n', G)
+    print('UT: \n', UT)
+    print('SIG: \n', SIG, '\n')
+
+    ## EFE calculations for policies of length 2
+    policies = []
+    policies += [np.array([[2, 2], [3, 3], [4, 4]])]
+    policies += [np.array([[3, 3], [2, 2], [3, 3]])]
+    policies += [np.array([[3, 3], [2, 2], [1, 1]])]
+    policies += [np.array([[3, 3], [4, 4], [3, 3]])]
+    G, UT, SIG, _ = update_posterior_policies(D, A, B, C, policies)
+    print('The results for policies of length 3:')
+    print('G: \n', G)
+    print('UT: \n', UT)
+    print('SIG: \n', SIG, '\n')
 
 def generate_agent_B(B, AG, layer=0):
     nodes = len(AG)
@@ -77,6 +104,24 @@ def generate_A(A, AG):
                 A[0][0, a, v] = .5
             A[0][1, :] = np.ones(nodes) - A[0][0, :]
     return A
+
+def plot_expectations(D, A, B, C, policies):
+    s_agent = []
+    s_victim = []
+    o_victim = []
+    for policy in policies:
+        qs_pi = control.get_expected_states(D, B, policy)
+        obs = control.get_expected_obs(qs_pi, A)
+        o_victim += [obs[0][0]]
+    xo = np.linspace(0, 1, 2)
+    dx = .25/len(o_victim)
+    w = dx * .8
+    plt.bar(xo - dx, o_victim[0], width = w)
+    plt.bar(xo, o_victim[1], width = w)
+    plt.bar(xo + dx, o_victim[2], width = w)
+    plt.legend(['action 0', 'action 2', 'action 3'])
+    plt.show()
+
 
 if __name__ == "__main__":
     main()
