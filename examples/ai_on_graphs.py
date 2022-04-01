@@ -27,7 +27,7 @@ def main():
     A = generate_A(A, AG)
     B = generate_agent_B(B, AG, layer=0)
     B = generate_victim_B(B, nodes, layer=1)
-    C[0] = np.array([1, 0])
+    C[0] = np.array([1, 0, 0])
     D[0] = np.array([1, 0, 0, 0, 0])
     D[1] = np.ones(nodes) / nodes
 
@@ -94,15 +94,15 @@ def generate_victim_B(B, nodes, layer=1):
 
 def generate_A(A, AG):
     nodes = len(AG)
-    A[0] = np.zeros((2, nodes, nodes))
+    A[0] = np.zeros((3, nodes, nodes))
     for v in range(nodes):
         for a in range(nodes):
             if a == v:
                 A[0][0, a, v] = 1
             neighbours = np.where(AG[:, v] == 1)
             if a in neighbours[0]:
-                A[0][0, a, v] = .5
-            A[0][1, :] = np.ones(nodes) - A[0][0, :]
+                A[0][1, a, v] = .5
+            A[0][2, :] = np.ones(nodes) - A[0][0, :] - A[0][1, :]
     return A
 
 def plot_expectations(D, A, B, C, policies):
@@ -113,7 +113,7 @@ def plot_expectations(D, A, B, C, policies):
         qs_pi = control.get_expected_states(D, B, policy)
         obs = control.get_expected_obs(qs_pi, A)
         o_victim += [obs[0][0]]
-    xo = np.linspace(0, 1, 2)
+    xo = np.linspace(0, 2, 3)
     dx = .25/len(o_victim)
     w = dx * .8
     plt.bar(xo - dx, o_victim[0], width = w)
